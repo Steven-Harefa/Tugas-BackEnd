@@ -1,12 +1,13 @@
 const express = require('express')
 const app = express()
-const bodyPanser = require('body-parser')
+const cors = require('cors')
 
 app.use(express.json())
 app.use(express.urlencoded())
-
+app.use(cors())
 
 const Db = require('mysql')
+const { rows } = require('mysql')
 const Connect = Db.createConnection({
 
     host : 'localhost',
@@ -35,37 +36,30 @@ app.get('/', function(req, res){
 
         <h1> Tugas BackEnd </h1>
 
-        <form action = "/Input" method = "POST">
-
-            <p> ID Pekerja </p>
-        
-            <input Name = "Txt_ID">
+        <form action = "/todo" method = "POST">
 
             <p> Nama Pekerja </p>
 
-            <input Name = "Txt_Nama">
+            <input type="teks" Name="Nama">
 
             <br>
             <br>
 
-            <button>Simpan Data</button>
+            <button type="submit">Simpan Data</button>
 
         </form>
-
 
         </html>`
     )
 
 })
 
-app.post('/Input', function(req, res){
+app.post('/todo', function(req, res){
     
-    var Data_ID = req.body.Txt_ID
-    var Data_Nama = req.body.Txt_Nama
-    var Perintah = "INSERT INTO data_pribadi (`ID_Pekerjaan`, `Nama`) values ('"+ Data_ID + "', '"+ Data_Nama +"')"
+    var Data_Nama = req.body.Nama
+    var Perintah = "INSERT INTO data_pribadi (Nama) VALUES ('"+ Data_Nama +"')"
 
-
-    Connect.query(Perintah, function(err){
+    Connect.query(Perintah, Data_Nama, function(err){
         if(err){
             throw err;
         }   
@@ -75,7 +69,24 @@ app.post('/Input', function(req, res){
     
 })
 
-app.get('/Tampil', function(req, res){
+app.delete('/todo/:id', function(req, res){
+
+    Connect.query("DELETE FROM data_pribadi WHERE ID_Pekerjaan = '"+ req.params.id +"'", function(err, rows){
+
+        if(!err){
+            
+        }
+
+        else{
+            console.log(err)
+        }
+        
+    })
+    
+    res.end()
+})
+
+app.get('/todo', function(req, res){
 
     Connect.query('SELECT * FROM data_pribadi', (err, rows, fields)=>{
 
@@ -88,6 +99,8 @@ app.get('/Tampil', function(req, res){
         }
 
     })
+
+    
 
 })
 
